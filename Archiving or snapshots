@@ -1,1 +1,75 @@
-This will contain the proccess of archiving/ taking snapshots for the logs
+/usr/local/bin/graylog-archive.sh
+
+###############################################
+# Graylog Enterprise Replacement (Linux + ES)
+###############################################
+
+ES_HOST="http://localhost:9200"
+MONGO_DB="graylog"
+BACKUP_ROOT="/backup/graylog"
+SNAP_REPO="graylog-archive"
+RETENTION_DAYS=30
+LOGFILE="/var/log/graylog-archive.log"
+
+DATE=$(date +%F_%H-%M)
+
+log() {
+  echo "[$(date +'%F %T')] $1" | tee -a "$LOGFILE"
+}
+
+mkdir -p "$BACKUP_ROOT/es"
+mkdir -p "$BACKUP_ROOT/mongo"
+mkdir -p "$BACKUP_ROOT/conf"
+
+###############################################
+# Register snapshot repo (safe repeat)
+###############################################
+log "Ensuring Elasticsearch snapshot repository exists..."
+curl -s -XPUT "$ES_HOST/_snapshot/$SNAP_REPO" \
+ -H "Content-Type: application/json" \
+ -d "{\"type\":\"fs\",\"settings\":{\"location\":\"$BACKUP_ROOT/es\",\"compress\":true}}" >/dev/null
+
+###############################################
+# MongoDB backup (Graylog configuration)
+###############################################
+log "Backing up MongoDB..."
+mongodump --db "$MONGO_DB" --out "$BACKUP_ROOT/mongo/mongo-$DATE"
+if [[ $? -ne 0 ]]; then
+  log "MongoDB backup FAILED"
+  exit 1
+fi
+
+###############################################
+# Graylog config backup
+###############################################
+log "Backing up Graylog configuration files..."
+tar -czf "$BACKUP_ROOT/conf/graylog-conf-$DATE.tgz" /etc/graylog/server /etc/elasticsearch /etc/mongod*
+if [[ $? -ne 0 ]]; then
+  log "Config backup FAILED"
+  exit 1
+fi
+
+###############################################
+# Elasticsearch Snapshot
+###############################################
+log "Creating Elasticsearch snapshot..."
+curl -s -XPUT "$ES_HOST/_snapshot/$SNAP_REPO/snap-$DATE?wait_for_completion=true" \
+ -H "Content-Type: application/json" \
+ -d '{"indices":"*","ignore_unavailable":true,"include_global_state":true}' >/dev/null
+
+if [[ $? -ne 0 ]]; then
+  log "Elasticsearch snapshot FAILED"
+  exit 1
+fi
+
+log "Snapshot completed successfully."
+
+###############################################
+# Cleanup old backups
+###############################################
+log "Cleaning backups older than $RETENTION_DAYS days..."
+find "$BACKUP_ROOT" -type f -mtime +$RETENTION_DAYS -delete
+find "$BACKUP_ROOT/mongo" -type d -mtime +$RETENTION_DAYS -exec rm -rf {} +
+
+log "Archive job finished successfully."
+exit 0
