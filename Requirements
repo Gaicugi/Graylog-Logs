@@ -1,0 +1,11 @@
+#Have the following
+#Run only once
+
+mongodump
+curl
+
+#Create Backup Location
+sudo mkdir -p /backup/graylog/es
+sudo mkdir -p /backup/graylog/mongo
+sudo mkdir -p /backup/graylog/conf
+sudo chmod -R 700 /backup/graylog
