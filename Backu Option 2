@@ -1,0 +1,13 @@
+#!/bin/bash
+
+LOCAL_BACKUP="/backup/graylog"
+REMOTE_DIR="/graylog-backups"
+USER="backupuser"
+HOST="192.168.1.50"
+LOGFILE="/var/log/graylog-filezilla.log"
+
+lftp -u "$USER" sftp://$HOST <<EOF
+set sftp:auto-confirm yes
+mirror -R --verbose --only-newer --parallel=2 $LOCAL_BACKUP $REMOTE_DIR
+bye
+EOF
