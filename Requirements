@@ -9,3 +9,4 @@ sudo mkdir -p /backup/graylog/es
 sudo mkdir -p /backup/graylog/mongo
 sudo mkdir -p /backup/graylog/conf
 sudo chmod -R 700 /backup/graylog
+vbnn
