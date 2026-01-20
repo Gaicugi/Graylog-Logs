@@ -1,2 +1,3 @@
 The aim of the project is to make sure that snapsots and backup happen automatically.
 Create a cron job for it
+Chatgpt does list the cronjobs commands but I have not done that yet, currently on scripts only
