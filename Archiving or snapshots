@@ -65,7 +65,7 @@ fi
 log "Snapshot completed successfully."
 
 ###############################################
-# Cleanup old backups
+# Cleanup old backups 
 ###############################################
 log "Cleaning backups older than $RETENTION_DAYS days..."
 find "$BACKUP_ROOT" -type f -mtime +$RETENTION_DAYS -delete
@@ -73,3 +73,6 @@ find "$BACKUP_ROOT/mongo" -type d -mtime +$RETENTION_DAYS -exec rm -rf {} +
 
 log "Archive job finished successfully."
 exit 0
+
+#############
+(My own Comment) To investigate if the dollarsigns mean I shoulreplace with an actual value
