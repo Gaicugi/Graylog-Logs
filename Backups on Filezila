@@ -12,3 +12,4 @@ mirror -R --verbose --only-newer --parallel=2 $LOCAL_BACKUP $REMOTE_DIR
 bye
 EOF
 
+#not sure what eof is
