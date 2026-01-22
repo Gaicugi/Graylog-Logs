@@ -22,7 +22,8 @@ mkdir -p "$BACKUP_ROOT/mongo"
 mkdir -p "$BACKUP_ROOT/conf"
 
 ###############################################
-# Register snapshot repo (safe repeat)
+# Register snapshot repo (safe repeat) 
+ryan's process is abit different
 ###############################################
 log "Ensuring Elasticsearch snapshot repository exists..."
 curl -s -XPUT "$ES_HOST/_snapshot/$SNAP_REPO" \
